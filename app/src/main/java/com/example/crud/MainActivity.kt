@@ -13,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.ktx.Firebase
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,6 +38,11 @@ class MainActivity : AppCompatActivity() {
                 userList.clear()
                 for (document in querySnapshot) {
                     val user = document.toObject(User::class.java)
+                    Log.d(TAG, "Retrieved user with ID: ${user.id}")
+
+                    // Handle the case where the id is null
+
+
                     userList.add(user)
                     addUserRecyclerView(user)
                 }
@@ -48,10 +54,15 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
+
+
+
     private fun addUserRecyclerView(user: User) {
         val recyclerView = RecyclerView(this)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = UserAdapter(listOf(user)) // Pass the user in a list to the adapter
+        recyclerView.adapter = UserAdapter(mutableListOf(user))
+
+        // Add item decoration
         recyclerView.addItemDecoration(ItemDecoration(this, resources.getDimensionPixelSize(R.dimen.item_space)))
 
         // Set rounded background and shadow for the RecyclerView
@@ -59,6 +70,7 @@ class MainActivity : AppCompatActivity() {
 
         userRecyclerViewContainer.addView(recyclerView)
     }
+
 
 
 }

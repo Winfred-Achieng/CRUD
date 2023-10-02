@@ -1,18 +1,20 @@
 package com.example.crud
 
 import android.content.ContentValues.TAG
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-class UserAdapter(private val userList: List<User>): RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+class UserAdapter(private val userList: MutableList<User>): RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
     inner class ViewHolder(itemView: View) :RecyclerView.ViewHolder(itemView){
         val nameTextView: TextView = itemView.findViewById(R.id.tvName)
@@ -24,20 +26,32 @@ class UserAdapter(private val userList: List<User>): RecyclerView.Adapter<UserAd
         init {
             deleteButton.setOnClickListener {
                 val user = userList[adapterPosition]
-                val userId = user.id
+                val userId = user.id ?: ""
 
-                val db =Firebase.firestore
-                db.collection("users").document(userId)
-                    .delete()
-                    .addOnSuccessListener {
-                        // Delete successful, update the UI or reload data
-                        //userList.removeAt(adapterPosition)
-                        notifyItemRemoved(adapterPosition)
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e(TAG, "Error deleting document", e)
-                    }
+                Log.d(TAG, "Deleting user with ID: $userId")
+
+                val db = Firebase.firestore
+
+                if (userId.isNotBlank()) {
+                    db.collection("users")
+                        .document(userId)
+                        .delete()
+                        .addOnSuccessListener {
+                            userList.removeAt(adapterPosition)
+                            notifyItemRemoved(adapterPosition)
+
+                            Log.d(TAG, "User deleted successfully")
+
+
+                        }
+                        .addOnFailureListener { exception ->
+                            Log.e(TAG, "Error deleting document", exception)
+                        }
+                } else {
+                    Log.e(TAG, "Invalid user ID")
+                }
             }
+
         }
 
     }
